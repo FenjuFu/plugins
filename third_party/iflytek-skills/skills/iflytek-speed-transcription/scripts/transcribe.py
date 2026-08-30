@@ -3,6 +3,9 @@
 """
 Xfei Speed Transcription API Client
 Ultra-fast speech transcription: 1 hour audio in ~20 seconds
+
+Modified for Cursor marketplace packaging to correct request digests,
+multipart chunk boundaries, and task-query CLI guidance.
 """
 
 import argparse
@@ -97,9 +100,11 @@ class XfeiSpeedTranscription:
         """Generate unique request ID."""
         return time.strftime("%Y%m%d%H%M%S")
 
-    def _hashlib_256(self, data: str) -> str:
+    def _hashlib_256(self, data) -> str:
         """Generate SHA-256 hash for digest."""
-        m = hashlib.sha256(bytes(data.encode(encoding='utf-8'))).digest()
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        m = hashlib.sha256(data).digest()
         return "SHA-256=" + base64.b64encode(m).decode(encoding='utf-8')
 
     def _assemble_auth_header(
@@ -117,7 +122,7 @@ class XfeiSpeedTranscription:
         now = datetime.datetime.now()
         date = format_date_time(mktime(now.timetuple()))
 
-        digest = "SHA-256=" + self._hashlib_256('')
+        digest = self._hashlib_256(body)
         signature_origin = f"host: {host}\ndate: {date}\n{method} {path} HTTP/1.1\ndigest: {digest}"
 
         signature_sha = hmac.new(
@@ -208,11 +213,7 @@ class XfeiSpeedTranscription:
         # Upload chunks
         with open(file_path, 'rb') as f:
             for slice_id in range(1, chunks + 1):
-                if slice_id == chunks:
-                    current_size = file_size % self.chunk_size
-                else:
-                    current_size = self.chunk_size
-
+                current_size = min(self.chunk_size, file_size - f.tell())
                 chunk_data = f.read(current_size)
 
                 file = {
@@ -519,7 +520,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Transcribe audio files using Xfei Ultra-fast Speech Transcription API"
     )
-    parser.add_argument("file_path", help="Path to audio file")
+    parser.add_argument("file_path", nargs="?", help="Path to audio file")
+    parser.add_argument("--task-id", help="Query an existing transcription task")
     parser.add_argument("--language", default="zh_cn",
                         help="Language (default: zh_cn for Chinese/English/202 dialects)")
     parser.add_argument("--accent", default="mandarin",
@@ -545,6 +547,24 @@ def main():
     # Create client
     client = XfeiSpeedTranscription(app_id, api_key, api_secret)
 
+    if args.task_id:
+        try:
+            query_result = client.query_task(args.task_id)
+            task_status = query_result.get('data', {}).get('task_status')
+            if args.output_format == "json":
+                print(json.dumps(query_result, ensure_ascii=False, indent=2))
+            elif task_status in ['3', '4']:
+                print(client._parse_result(query_result).get("text", ""))
+            else:
+                print(f"Task {args.task_id} status: {task_status or 'unknown'}")
+            return
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    if not args.file_path:
+        parser.error("file_path is required unless --task-id is provided")
+
     # Transcribe
     file_path = Path(args.file_path)
     if not file_path.exists():
@@ -567,7 +587,7 @@ def main():
             # Just show task ID
             print(f"Task ID: {result['task_id']}")
             print(f"\nTo query results:")
-            print(f"  python3 scripts/transcribe.py --action=query --task-id={result['task_id']}")
+            print(f"  python3 scripts/transcribe.py --task-id {result['task_id']}")
         else:
             # Show transcription
             if args.output_format == "json":

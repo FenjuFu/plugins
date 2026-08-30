@@ -3,6 +3,8 @@
 """
 iFlytek LLM OCR Client
 OCR images using iFlytek LLM OCR API (HMAC-SHA256 authentication)
+
+Modified for Cursor marketplace packaging to correct HMAC host parsing.
 """
 
 import argparse
@@ -43,11 +45,12 @@ class IflyImageOCRClient:
         Returns:
             Authenticated URL
         """
-        from urllib.parse import urlencode, quote
+        from urllib.parse import urlencode, urlparse
 
         # Parse host and path
-        host = self.API_HOST.replace("https://", "").replace("http://", "")
-        path = "/v1/private/se75ocrbm"
+        parsed_url = urlparse(self.API_HOST)
+        host = parsed_url.netloc
+        path = parsed_url.path
 
         # Generate date in RFC1123 format
         date = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")

@@ -1,6 +1,6 @@
 ---
 name: iflytek-speed-transcription
-description: Ultra-fast speech transcription using iFLYTEK Speed Transcription API. Transcribe audio files (WAV/PCM/MP3) up to 5 hours in ~20 seconds per hour. Supports Chinese, English, and 202+ Chinese dialects with automatic language detection. Use when user asks to transcribe audio files, convert speech to text, or mentions "speed transcription" or "极速转写".
+description: Ultra-fast speech transcription using iFLYTEK Speed Transcription API. Transcribe audio files (MP3) up to 5 hours in ~20 seconds per hour. Supports Chinese, English, and 202+ Chinese dialects with automatic language detection. Use when user asks to transcribe audio files, convert speech to text, or mentions "speed transcription" or "极速转写".
 metadata: {
   "homepage": "https://www.xfyun.cn/services/speed_transcription",
   "openclaw": "{\"emoji\":\"⚡\",\"dimensions\":[\"极速转写\",\"语音转文字\"],\"user_instructions\":[\"把这段音频转成文字\",\"帮我转写这个录音\",\"语音转文字\"],\"requires\":{\"bins\":[\"python3\"],\"env\":[\"XFEI_APP_ID\",\"XFEI_API_KEY\",\"XFEI_API_SECRET\"]},\"primaryEnv\":\"XFEI_API_KEY\"}"
@@ -8,6 +8,8 @@ metadata: {
 ---
 
 # iFly Speed Transcription
+
+> Modified for Cursor marketplace packaging to document task lookup and the MP3-only CLI contract.
 
 Ultra-fast speech transcription service that converts audio files to text in record time - **1 hour of audio transcribes in ~20 seconds**.
 
@@ -62,6 +64,7 @@ export XFEI_API_SECRET="your_api_secret"
 | `--pd` | string | Domain: court, finance, medical, tech, sport, edu, gov, game, ecom, car |
 | `--vspp-on` | int | Speaker separation: 0=off, 1=on |
 | `--speaker-num` | int | Number of speakers (0=auto, range 1-10) |
+| `--task-id` | string | Query an existing task without an audio file path |
 | `--output-type` | int | Output: 0=1best, 1=cnlbest, 2=multi-candidate |
 | `--postproc-on` | int | Post-processing: 0=off, 1=on (default) |
 | `--enable-subtitle` | int | Subtitle mode: 0=document, 1=subtitle |

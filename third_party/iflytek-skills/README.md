@@ -52,7 +52,9 @@ Before sending confidential, personal, regulated, or proprietary content, confir
 
 ## Provenance
 
-The skill packages are vendored without functional changes from [`iflytek/iFly-Skills` at `062da188ac91ef11047e430d4ab90bbed296b97c`](https://github.com/iflytek/iFly-Skills/tree/062da188ac91ef11047e430d4ab90bbed296b97c) and remain available under Apache-2.0.
+The skill packages are based on [`iflytek/iFly-Skills` at `062da188ac91ef11047e430d4ab90bbed296b97c`](https://github.com/iflytek/iFly-Skills/tree/062da188ac91ef11047e430d4ab90bbed296b97c) and remain available under Apache-2.0. Modified files carry a Cursor marketplace packaging notice.
+
+This package applies targeted correctness fixes for image OCR host signing, proofreading Host headers, transcription request digests and aligned multipart uploads, URL-only PDF OCR, and transcription task lookup. Regression tests cover all six fixes.
 
 This initial package intentionally excludes the upstream contract-review workflow because its service clients still require injected implementations, voice cloning because its training flow currently uses plain-HTTP endpoints, and the animated diagram skill because it is outside this API-integration scope.
 

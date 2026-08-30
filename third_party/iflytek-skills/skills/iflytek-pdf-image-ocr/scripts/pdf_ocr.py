@@ -3,6 +3,8 @@
 """
 iFlytek PDF OCR Client
 Recognize PDF documents using iFlytek PDF OCR API (MD5 + HMAC-SHA1 authentication)
+
+Modified for Cursor marketplace packaging to support URL-only PDF OCR requests.
 """
 
 import argparse
@@ -256,7 +258,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="OCR PDF documents using iFlytek PDF OCR API"
     )
-    parser.add_argument("pdf_path", help="Path to PDF file")
+    parser.add_argument("pdf_path", nargs="?", help="Path to PDF file")
     parser.add_argument("--pdf-url", help="Public URL of PDF (alternative to file upload)")
     parser.add_argument("--format", choices=["word", "markdown", "json"],
                         default="word", help="Output format (default: word)")
@@ -275,9 +277,12 @@ def main():
     # Create client
     client = IflyPdfOCRClient(app_id, api_secret)
 
-    # Check PDF file
-    pdf_path = Path(args.pdf_path)
-    if not pdf_path.exists():
+    if not args.pdf_path and not args.pdf_url:
+        parser.error("either pdf_path or --pdf-url is required")
+
+    # Check PDF file when a local path is provided
+    pdf_path = Path(args.pdf_path) if args.pdf_path else None
+    if pdf_path is not None and not pdf_path.exists():
         print(f"Error: PDF not found: {pdf_path}", file=sys.stderr)
         sys.exit(1)
 

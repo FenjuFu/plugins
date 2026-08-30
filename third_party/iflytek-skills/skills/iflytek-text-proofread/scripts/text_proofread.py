@@ -3,6 +3,8 @@
 """
 iFlytek Official Document Proofreading (公文校对) — pure Python stdlib, no pip dependencies.
 
+Modified for Cursor marketplace packaging to align the HTTP Host header with the signed endpoint.
+
 Env vars required:
     IFLY_APP_ID       - 讯飞 appId
     IFLY_API_KEY      - apiKey
@@ -149,9 +151,10 @@ def _build_body(app_id, text):
 
 def _http_post(url, body_dict, app_id, timeout=60):
     data = json.dumps(body_dict).encode("utf-8")
+    host, _, _ = _parse_url(url)
     headers = {
         "Content-Type": "application/json",
-        "host": "api.xf-yun.com",
+        "host": host,
         "app_id": app_id,
     }
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")

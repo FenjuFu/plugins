@@ -1,5 +1,7 @@
 # iFly PDF & Image OCR
 
+> Modified for Cursor marketplace packaging to document URL-only PDF OCR support.
+
 通用 OCR 技能，包含两个独立脚本：
 
 - `scripts/image_ocr.py`：图片 OCR
@@ -72,7 +74,7 @@ python3 scripts/pdf_ocr.py ./document.pdf --poll-interval 10 --max-wait 600
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `pdf_path` | 本地 PDF 路径 | - |
-| `--pdf-url` | 公网 PDF URL；当前 CLI 仍要求传入本地 `pdf_path` | 不传 |
+| `--pdf-url` | 公网 PDF URL；使用时可省略本地 `pdf_path` | 不传 |
 | `--format` | `word`、`markdown`、`json` | `word` |
 | `--no-poll` | 只返回任务号，不等待结果 | 关闭 |
 | `--poll-interval` | 轮询间隔，最小 5 秒 | `5` |
@@ -82,7 +84,7 @@ python3 scripts/pdf_ocr.py ./document.pdf --poll-interval 10 --max-wait 600
 
 - PDF OCR 最大支持 `100` 页。
 - 加密 PDF 不支持。
-- `pdf_ocr.py` 当前实现里，`--pdf-url` 不是独立的 URL-only 模式，命令行仍会校验本地 `pdf_path` 是否存在。
+- 使用 `--pdf-url` 时可以省略本地 `pdf_path`；未提供 URL 时仍会校验本地文件是否存在。
 - 图片 OCR 使用 `HMAC-SHA256` 鉴权；PDF OCR 使用 `MD5 + HMAC-SHA1` 鉴权。
 - 完整文档与错误码说明见 [`SKILL.md`](./SKILL.md)。
 

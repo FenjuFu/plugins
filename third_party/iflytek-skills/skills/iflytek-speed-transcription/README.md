@@ -1,5 +1,7 @@
 # iFly Speed Transcription
 
+> Modified for Cursor marketplace packaging to document task lookup by ID.
+
 基于讯飞极速转写 API，将长音频快速转成文本。对应脚本为 `scripts/transcribe.py`，依赖 `requests`。
 
 ## 前置条件
@@ -36,6 +38,9 @@ python3 scripts/transcribe.py ./audio.mp3 --output-format json
 
 # 只提交任务，不等待结果
 python3 scripts/transcribe.py ./audio.mp3 --no-poll
+
+# Query a task returned by --no-poll
+python3 scripts/transcribe.py --task-id YOUR_TASK_ID --output-format json
 ```
 
 ## 参数说明
@@ -49,6 +54,7 @@ python3 scripts/transcribe.py ./audio.mp3 --no-poll
 | `--vspp-on` | 是否开启说话人分离，`0` 或 `1` | 不传 |
 | `--speaker-num` | 说话人数，`0` 为自动 | 不传 |
 | `--no-poll` | 只返回任务 ID | 关闭 |
+| `--task-id` | 查询已有任务 ID，可省略音频路径 | 不传 |
 | `--poll-interval` | 轮询间隔（秒） | `5` |
 | `--output`, `-o` | 保存输出到文件 | 不保存 |
 | `--output-format` | `text` 或 `json` | `text` |
