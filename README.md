@@ -66,6 +66,7 @@ Official Cursor plugins for popular developer tools, frameworks, and SaaS produc
 | `readwise` | [Readwise](third_party/readwise/) | Cursor | Integrations | Search highlights and Reader documents, save articles. |
 | `similarweb` | [Similarweb](third_party/similarweb/) | Cursor | Integrations | Analyze website traffic, audiences, and competitors. |
 | `xero` | [Xero](third_party/xero/) | Cursor | Integrations | Read and write invoices, contacts, reports, and payroll. |
+| `iflytek-skills` | [iFLYTEK Skills](third_party/iflytek-skills/) | iFLYTEK | Integrations | Speech, OCR, translation, proofreading, and multimodal AI workflows. |
 Author values match each plugin’s `plugin.json` `author.name` (Cursor lists `plugins@cursor.com` in the manifest).
 
 ## Repository structure
