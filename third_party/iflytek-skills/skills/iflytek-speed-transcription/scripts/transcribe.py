@@ -551,12 +551,21 @@ def main():
         try:
             query_result = client.query_task(args.task_id)
             task_status = query_result.get('data', {}).get('task_status')
-            if args.output_format == "json":
-                print(json.dumps(query_result, ensure_ascii=False, indent=2))
-            elif task_status in ['3', '4']:
-                print(client._parse_result(query_result).get("text", ""))
+            if task_status in ['3', '4']:
+                parsed_result = client._parse_result(query_result)
+                if args.output_format == "json":
+                    output = json.dumps(parsed_result, ensure_ascii=False, indent=2)
+                else:
+                    output = parsed_result.get("text", "")
+            elif args.output_format == "json":
+                output = json.dumps(query_result, ensure_ascii=False, indent=2)
             else:
-                print(f"Task {args.task_id} status: {task_status or 'unknown'}")
+                output = f"Task {args.task_id} status: {task_status or 'unknown'}"
+
+            print(output)
+            if args.output:
+                Path(args.output).write_text(output, encoding='utf-8')
+                print(f"\nSaved to: {args.output}")
             return
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)

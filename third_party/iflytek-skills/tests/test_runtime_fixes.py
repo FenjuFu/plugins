@@ -155,6 +155,54 @@ class RuntimeFixesTest(unittest.TestCase):
         client.query_task.assert_called_once_with("task-1")
         self.assertIn("Task task-1 status: 2", output.getvalue())
 
+    def test_completed_transcription_query_uses_parsed_json(self):
+        client = mock.Mock()
+        client.query_task.return_value = {"data": {"task_status": "3"}}
+        client._parse_result.return_value = {
+            "task_id": "task-1",
+            "text": "transcribed",
+            "segments": [{"text": "transcribed"}],
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(
+            sys,
+            "argv",
+            ["transcribe.py", "--task-id", "task-1", "--output-format", "json"],
+        ), mock.patch.object(
+            TRANSCRIBE, "load_config", return_value=("app", "key", "secret")
+        ), mock.patch.object(
+            TRANSCRIBE, "XfeiSpeedTranscription", return_value=client
+        ), contextlib.redirect_stdout(output):
+            TRANSCRIBE.main()
+
+        rendered = output.getvalue()
+        self.assertIn('"text": "transcribed"', rendered)
+        self.assertIn('"segments"', rendered)
+        client._parse_result.assert_called_once_with(client.query_task.return_value)
+
+    def test_transcription_query_writes_output_file(self):
+        client = mock.Mock()
+        client.query_task.return_value = {"data": {"task_status": "2"}}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "status.txt"
+            with mock.patch.object(
+                sys,
+                "argv",
+                ["transcribe.py", "--task-id", "task-1", "--output", str(output_path)],
+            ), mock.patch.object(
+                TRANSCRIBE, "load_config", return_value=("app", "key", "secret")
+            ), mock.patch.object(
+                TRANSCRIBE, "XfeiSpeedTranscription", return_value=client
+            ), contextlib.redirect_stdout(io.StringIO()):
+                TRANSCRIBE.main()
+
+            self.assertEqual(
+                output_path.read_text(encoding="utf-8"),
+                "Task task-1 status: 2",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
