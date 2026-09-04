@@ -41,6 +41,9 @@ python3 scripts/pdf_ocr.py document.pdf --format json
 
 # From public URL
 python3 scripts/pdf_ocr.py --pdf-url "https://example.com/doc.pdf" --format word
+
+# Resume a task returned by --no-poll
+python3 scripts/pdf_ocr.py --task-no "25082744936879"
 ```
 
 ## Setup
@@ -108,12 +111,13 @@ export IFLY_API_SECRET="your_api_secret"
 |-----------|------|----------|-------------|
 | `pdf_path` | string | Yes* | Path to PDF file |
 | `--pdf-url` | string | No* | Public URL of PDF file |
+| `--task-no` | string | No* | Query an existing task returned by `--no-poll` |
 | `--format` | string | No | Output format: word, markdown, json (default: word) |
 | `--no-poll` | flag | No | Return task ID without polling |
 | `--poll-interval` | int | No | Polling interval in seconds (min 5, default: 5) |
 | `--max-wait` | int | No | Maximum wait time in seconds (default: 300) |
 
-*Either `pdf_path` or `--pdf-url` must be provided
+*Provide `pdf_path` or `--pdf-url` to create a task, or `--task-no` to query an existing task.
 
 ## Authentication
 
@@ -276,3 +280,4 @@ Uses MD5 + HMAC-SHA1 signature authentication:
 3. **Polling interval**: Minimum 5 seconds between status queries
 4. **Network URLs**: Ensure PDF URLs are publicly accessible
 5. **Download URLs**: Download files promptly as URLs may expire
+6. **Long-running tasks**: Use `--no-poll`, save the task number, then query it later with `--task-no`

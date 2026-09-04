@@ -126,12 +126,13 @@ class RuntimeFixesTest(unittest.TestCase):
     def test_pdf_ocr_accepts_url_without_local_path(self):
         client = mock.Mock()
         client.ocr.return_value = {"data": {"taskNo": "task", "status": "queued"}}
+        output = io.StringIO()
 
         with mock.patch.object(sys, "argv", ["pdf_ocr.py", "--pdf-url", "https://example.test/doc.pdf", "--no-poll"]), mock.patch.object(
             PDF_OCR, "load_config", return_value=("app", "secret")
         ), mock.patch.object(
             PDF_OCR, "IflyPdfOCRClient", return_value=client
-        ), contextlib.redirect_stdout(io.StringIO()):
+        ), contextlib.redirect_stdout(output):
             PDF_OCR.main()
 
         self.assertIsNone(client.ocr.call_args.kwargs["pdf_path"])
@@ -139,6 +140,31 @@ class RuntimeFixesTest(unittest.TestCase):
             client.ocr.call_args.kwargs["pdf_url"],
             "https://example.test/doc.pdf",
         )
+        self.assertIn("python3 scripts/pdf_ocr.py --task-no task", output.getvalue())
+
+    def test_pdf_ocr_queries_existing_task(self):
+        client = mock.Mock()
+        client.query_status.return_value = {
+            "data": {
+                "taskNo": "task-1",
+                "status": "FINISH",
+                "exportFormat": "word",
+                "downUrl": "https://example.test/result.docx",
+            }
+        }
+        output = io.StringIO()
+
+        with mock.patch.object(sys, "argv", ["pdf_ocr.py", "--task-no", "task-1"]), mock.patch.object(
+            PDF_OCR, "load_config", return_value=("app", "secret")
+        ), mock.patch.object(
+            PDF_OCR, "IflyPdfOCRClient", return_value=client
+        ), contextlib.redirect_stdout(output):
+            PDF_OCR.main()
+
+        client.query_status.assert_called_once_with("task-1")
+        client.ocr.assert_not_called()
+        self.assertIn("Task No: task-1", output.getvalue())
+        self.assertIn("https://example.test/result.docx", output.getvalue())
 
     def test_transcription_cli_queries_existing_task(self):
         client = mock.Mock()

@@ -65,6 +65,9 @@ python3 scripts/pdf_ocr.py ./document.pdf --format markdown
 # 只提交任务，不轮询
 python3 scripts/pdf_ocr.py ./document.pdf --no-poll
 
+# 使用上一步返回的任务号恢复查询
+python3 scripts/pdf_ocr.py --task-no 25082744936879
+
 # 调整轮询时间
 python3 scripts/pdf_ocr.py ./document.pdf --poll-interval 10 --max-wait 600
 ```
@@ -75,6 +78,7 @@ python3 scripts/pdf_ocr.py ./document.pdf --poll-interval 10 --max-wait 600
 |------|------|--------|
 | `pdf_path` | 本地 PDF 路径 | - |
 | `--pdf-url` | 公网 PDF URL；使用时可省略本地 `pdf_path` | 不传 |
+| `--task-no` | 查询 `--no-poll` 返回的已有任务 | 不传 |
 | `--format` | `word`、`markdown`、`json` | `word` |
 | `--no-poll` | 只返回任务号，不等待结果 | 关闭 |
 | `--poll-interval` | 轮询间隔，最小 5 秒 | `5` |
@@ -85,6 +89,7 @@ python3 scripts/pdf_ocr.py ./document.pdf --poll-interval 10 --max-wait 600
 - PDF OCR 最大支持 `100` 页。
 - 加密 PDF 不支持。
 - 使用 `--pdf-url` 时可以省略本地 `pdf_path`；未提供 URL 时仍会校验本地文件是否存在。
+- 使用 `--no-poll` 时请保存任务号，之后通过 `--task-no` 查询状态与下载地址。
 - 图片 OCR 使用 `HMAC-SHA256` 鉴权；PDF OCR 使用 `MD5 + HMAC-SHA1` 鉴权。
 - 完整文档与错误码说明见 [`SKILL.md`](./SKILL.md)。
 

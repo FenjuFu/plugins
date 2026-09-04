@@ -254,12 +254,45 @@ def load_config():
     return app_id, api_secret
 
 
+def print_result(result: dict):
+    """Render a PDF OCR status response and any available download URLs."""
+    data = result.get('data', {})
+    status = data.get('status')
+    export_format = data.get('exportFormat')
+    down_url = data.get('downUrl')
+
+    print(f"\n{'='*60}")
+    print("PDF OCR Result:")
+    print(f"{'='*60}")
+    print(f"Task No: {data.get('taskNo')}")
+    print(f"Status: {status}")
+    print(f"Export Format: {export_format}")
+
+    if down_url:
+        print(f"\nDownload URL:")
+        print(f"  {down_url}")
+
+    page_list = data.get('pageList', [])
+    if page_list:
+        print(f"\nPages: {len(page_list)}")
+        for page in page_list:
+            page_num = page.get('pageNum')
+            page_status = page.get('status')
+            page_down_url = page.get('downUrl')
+            print(f"  Page {page_num}: {page_status}")
+            if page_down_url:
+                print(f"    {page_down_url}")
+
+    print(f"{'='*60}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="OCR PDF documents using iFlytek PDF OCR API"
     )
     parser.add_argument("pdf_path", nargs="?", help="Path to PDF file")
     parser.add_argument("--pdf-url", help="Public URL of PDF (alternative to file upload)")
+    parser.add_argument("--task-no", help="Query an existing PDF OCR task")
     parser.add_argument("--format", choices=["word", "markdown", "json"],
                         default="word", help="Output format (default: word)")
     parser.add_argument("--no-poll", action="store_true",
@@ -277,8 +310,10 @@ def main():
     # Create client
     client = IflyPdfOCRClient(app_id, api_secret)
 
-    if not args.pdf_path and not args.pdf_url:
-        parser.error("either pdf_path or --pdf-url is required")
+    if args.task_no and (args.pdf_path or args.pdf_url):
+        parser.error("--task-no cannot be combined with pdf_path or --pdf-url")
+    if not args.task_no and not args.pdf_path and not args.pdf_url:
+        parser.error("pdf_path or --pdf-url is required unless --task-no is provided")
 
     # Check PDF file when a local path is provided
     pdf_path = Path(args.pdf_path) if args.pdf_path else None
@@ -287,6 +322,11 @@ def main():
         sys.exit(1)
 
     try:
+        if args.task_no:
+            result = client.query_status(args.task_no)
+            print_result(result)
+            return
+
         result = client.ocr(
             pdf_path=pdf_path,
             pdf_url=args.pdf_url,
@@ -300,36 +340,10 @@ def main():
             # Just show task ID
             print(f"\nTask No: {result['data']['taskNo']}")
             print(f"Status: {result['data']['status']}")
+            print(f"\nTo query results:")
+            print(f"  python3 scripts/pdf_ocr.py --task-no {result['data']['taskNo']}")
         else:
-            # Show results
-            data = result.get('data', {})
-            status = data.get('status')
-            export_format = data.get('exportFormat')
-            down_url = data.get('downUrl')
-
-            print(f"\n{'='*60}")
-            print("PDF OCR Result:")
-            print(f"{'='*60}")
-            print(f"Task No: {data.get('taskNo')}")
-            print(f"Status: {status}")
-            print(f"Export Format: {export_format}")
-
-            if down_url:
-                print(f"\nDownload URL:")
-                print(f"  {down_url}")
-
-            page_list = data.get('pageList', [])
-            if page_list:
-                print(f"\nPages: {len(page_list)}")
-                for page in page_list:
-                    page_num = page.get('pageNum')
-                    page_status = page.get('status')
-                    page_down_url = page.get('downUrl')
-                    print(f"  Page {page_num}: {page_status}")
-                    if page_down_url:
-                        print(f"    {page_down_url}")
-
-            print(f"{'='*60}")
+            print_result(result)
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
