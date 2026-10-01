@@ -1,15 +1,15 @@
 ---
 name: iflytek-speed-transcription
-description: Ultra-fast speech transcription using iFLYTEK Speed Transcription API. Transcribe audio files (MP3) up to 5 hours in ~20 seconds per hour. Supports Chinese, English, and 202+ Chinese dialects with automatic language detection. Use when user asks to transcribe audio files, convert speech to text, or mentions "speed transcription" or "极速转写".
+description: Ultra-fast speech transcription using iFLYTEK Speed Transcription API. Transcribe MP3 audio files up to 5 hours in ~20 seconds per hour. Supports Chinese, English, and 202+ Chinese dialects with automatic language detection. Use when user asks to transcribe audio files, convert speech to text, or mentions "speed transcription" or "极速转写".
 metadata: {
   "homepage": "https://www.xfyun.cn/services/speed_transcription",
-  "openclaw": "{\"emoji\":\"⚡\",\"dimensions\":[\"极速转写\",\"语音转文字\"],\"user_instructions\":[\"把这段音频转成文字\",\"帮我转写这个录音\",\"语音转文字\"],\"requires\":{\"bins\":[\"python3\"],\"env\":[\"XFEI_APP_ID\",\"XFEI_API_KEY\",\"XFEI_API_SECRET\"]},\"primaryEnv\":\"XFEI_API_KEY\"}"
+  "openclaw": "{\"emoji\":\"⚡\",\"dimensions\":[\"极速转写\",\"语音转文字\"],\"user_instructions\":[\"把这段音频转成文字\",\"帮我转写这个录音\",\"语音转文字\"],\"requires\":{\"bins\":[\"python3\"],\"env\":[\"IFLY_APP_ID\",\"IFLY_API_KEY\",\"IFLY_API_SECRET\"]},\"primaryEnv\":\"IFLY_API_KEY\"}"
 }
 ---
 
 # iFly Speed Transcription
 
-> Modified for Cursor marketplace packaging to document task lookup and the MP3-only CLI contract.
+> Modified for Cursor marketplace packaging to expose the documented task options and the MP3-only CLI contract (submitted upstream as iflytek/iFly-Skills#106).
 
 Ultra-fast speech transcription service that converts audio files to text in record time - **1 hour of audio transcribes in ~20 seconds**.
 
@@ -20,13 +20,17 @@ Ultra-fast speech transcription service that converts audio files to text in rec
 python3 scripts/transcribe.py /path/to/audio.mp3
 
 # Save to file
-python3 scripts/transcribe.py /path/to/audio.wav --output result.txt
+python3 scripts/transcribe.py /path/to/audio.mp3 --output result.txt
 
 # With domain-specific optimization
 python3 scripts/transcribe.py /path/to/audio.mp3 --pd medical
 
 # With speaker separation
 python3 scripts/transcribe.py /path/to/meeting.mp3 --vspp-on 1 --speaker-num 2
+
+# Submit without waiting, then query the task later
+python3 scripts/transcribe.py /path/to/audio.mp3 --no-poll
+python3 scripts/transcribe.py --action query --task-id TASK_ID
 ```
 
 ## Setup
@@ -42,10 +46,12 @@ Get credentials from [iFlytek Open Platform](https://www.xfyun.cn/):
 ### 2. Environment Variables
 
 ```bash
-export XFEI_APP_ID="your_app_id"
-export XFEI_API_KEY="your_api_key"
-export XFEI_API_SECRET="your_api_secret"
+export IFLY_APP_ID="your_app_id"
+export IFLY_API_KEY="your_api_key"
+export IFLY_API_SECRET="your_api_secret"
 ```
+
+> 兼容说明：设置任意 `IFLY_*` 凭证变量（包括空值）后，仅使用该组，缺项报错；未设置标准组时，依次尝试 `XFEI_*`、`XFYUN_*`，不跨组拼接。旧前缀会在 stderr 输出一次不含凭证值的迁移提示。
 
 ## API Parameters
 
@@ -64,7 +70,6 @@ export XFEI_API_SECRET="your_api_secret"
 | `--pd` | string | Domain: court, finance, medical, tech, sport, edu, gov, game, ecom, car |
 | `--vspp-on` | int | Speaker separation: 0=off, 1=on |
 | `--speaker-num` | int | Number of speakers (0=auto, range 1-10) |
-| `--task-id` | string | Query an existing task without an audio file path |
 | `--output-type` | int | Output: 0=1best, 1=cnlbest, 2=multi-candidate |
 | `--postproc-on` | int | Post-processing: 0=off, 1=on (default) |
 | `--enable-subtitle` | int | Subtitle mode: 0=document, 1=subtitle |
@@ -72,6 +77,12 @@ export XFEI_API_SECRET="your_api_secret"
 | `--colloqproc` | bool | Colloquial processing: true=on, false=off |
 | `--language-type` | int | Language mode: 1=auto, 2=Chinese, 3=English, 4=Chinese-only |
 | `--dhw` | string | Hot words (comma-separated, UTF-8) |
+| `--no-poll` | flag | Submit the task and print its ID without waiting |
+| `--action` | string | `transcribe` (default) or `query` |
+| `--task-id` | string | Existing task ID, required with `--action query` |
+| `--poll-interval` | int | Polling interval in seconds (default: 5) |
+| `--output`, `-o` | string | Save the result to a file |
+| `--output-format` | string | `text` (default) or `json` |
 
 ### Audio Requirements
 

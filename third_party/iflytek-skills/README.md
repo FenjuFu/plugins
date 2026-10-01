@@ -33,14 +33,17 @@ Install only the dependencies needed for the skill you plan to run. The plugin d
 
 ## Credentials
 
-The upstream skills use several environment-variable prefixes. Configure the exact variables listed for the selected skill:
+All skills read one set of credentials:
 
-| Skills | Environment variables |
-|:-------|:----------------------|
-| Hyper TTS, speed transcription | `XFEI_APP_ID`, `XFEI_API_KEY`, `XFEI_API_SECRET` |
-| Image understanding, PDF/image OCR, text proofread | `IFLY_APP_ID`, `IFLY_API_KEY`, `IFLY_API_SECRET` (PDF OCR does not require `IFLY_API_KEY`) |
-| Invoice OCR, machine translation | `XFYUN_APP_ID`, `XFYUN_API_KEY`, `XFYUN_API_SECRET` |
-| Video translation | `XFYUN_API_KEY`, `XFYUN_API_SECRET` |
+```bash
+export IFLY_APP_ID="your_app_id"
+export IFLY_API_KEY="your_api_key"
+export IFLY_API_SECRET="your_api_secret"
+```
+
+PDF OCR does not need `IFLY_API_KEY`, and video translation does not need `IFLY_APP_ID`.
+
+Hyper TTS, speed transcription, invoice OCR, machine translation, and video translation still accept the older `XFEI_*` and `XFYUN_*` names when no `IFLY_*` variable is set. They use one prefix as a complete set and never mix values from different prefixes.
 
 Create and manage credentials at the [iFLYTEK Open Platform console](https://console.xfyun.cn/). Do not commit credentials to a repository or paste them into prompts.
 
@@ -52,9 +55,9 @@ Before sending confidential, personal, regulated, or proprietary content, confir
 
 ## Provenance
 
-The skill packages are based on [`iflytek/iFly-Skills` at `062da188ac91ef11047e430d4ab90bbed296b97c`](https://github.com/iflytek/iFly-Skills/tree/062da188ac91ef11047e430d4ab90bbed296b97c) and remain available under Apache-2.0. Modified files carry a Cursor marketplace packaging notice.
+The skill packages are based on [`iflytek/iFly-Skills` at `beb3ae3a16d9ba952303acac1eb801f234d9c348`](https://github.com/iflytek/iFly-Skills/tree/beb3ae3a16d9ba952303acac1eb801f234d9c348) and remain available under Apache-2.0. Modified files carry a Cursor marketplace packaging notice.
 
-This package applies targeted correctness fixes for image OCR host signing, proofreading Host headers, transcription request digests and aligned multipart uploads, URL-only PDF OCR, and transcription task lookup. Regression tests cover all marketplace packaging fixes.
+This package applies targeted correctness fixes for image OCR host signing, proofreading Host headers, and URL-only PDF OCR. It also exposes the speed transcription task options that the upstream skill documents but its CLI does not accept; that change is submitted upstream as [iflytek/iFly-Skills#106](https://github.com/iflytek/iFly-Skills/pull/106). Regression tests cover all marketplace packaging fixes.
 
 This initial package intentionally excludes the upstream contract-review workflow because its service clients still require injected implementations, voice cloning because its training flow currently uses plain-HTTP endpoints, and the animated diagram skill because it is outside this API-integration scope.
 
