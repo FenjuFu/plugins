@@ -4,7 +4,7 @@
 iFlytek LLM OCR Client
 OCR images using iFlytek LLM OCR API (HMAC-SHA256 authentication)
 
-Modified for Cursor marketplace packaging to correct HMAC host parsing.
+Modified for Cursor marketplace packaging to correct HMAC signing and image encoding.
 """
 
 import argparse
@@ -15,7 +15,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timezone
+from email.utils import formatdate
 from pathlib import Path
 
 import requests
@@ -53,7 +53,7 @@ class IflyImageOCRClient:
         path = parsed_url.path
 
         # Generate date in RFC1123 format
-        date = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        date = formatdate(usegmt=True)
 
         # Build signature origin
         signature_origin = f"host: {host}\ndate: {date}\nPOST {path} HTTP/1.1"
@@ -94,7 +94,7 @@ class IflyImageOCRClient:
         with open(image_path, 'rb') as f:
             image_bytes = f.read()
         image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-        file_type = Path(image_path).suffix.lstrip('.')
+        file_type = Path(image_path).suffix.lstrip('.').lower()
 
         # Build request JSON
         request_data = {

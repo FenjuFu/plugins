@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
+from urllib.parse import parse_qs, urlparse
 
 
 SCRIPT_PATH = Path(__file__).parents[1] / "scripts" / "xfei_hyper_tts.py"
@@ -40,6 +41,17 @@ class FakeWebSocket:
 
 
 class SynthesizeTest(unittest.TestCase):
+    def test_auth_date_ignores_locale(self):
+        client = TTS_MODULE.XfeiHyperTTSClient("app", "key", "secret")
+        with mock.patch("time.time", return_value=1445412480), mock.patch(
+            "time.strftime", return_value="mer., 21 oct. 2015 07:28:00 GMT"
+        ):
+            query = parse_qs(urlparse(client._build_auth_url()).query)
+
+        self.assertEqual(query["date"], ["Wed, 21 Oct 2015 07:28:00 GMT"])
+        authorization = base64.b64decode(query["authorization"][0]).decode()
+        self.assertIn('signature="WYhO+39j8DPHekrcIy6+ix5ej3sy+c3glBzd1mAr2Bc="', authorization)
+
     def test_synthesize_completes_with_service_response(self):
         audio = b"synthetic-audio"
         socket = FakeWebSocket(audio)

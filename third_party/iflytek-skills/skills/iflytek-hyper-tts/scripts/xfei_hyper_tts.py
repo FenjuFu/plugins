@@ -3,6 +3,7 @@
 讯飞超拟人语音合成 (iFlytek Hyper TTS)
 
 将文本转换为超拟人语音。
+Modified for Cursor marketplace packaging to use locale-independent auth dates.
 API 文档：https://www.xfyun.cn/doc/spark/super%20smart-tts.html
 
 默认发音人：聆小糖 (x5_lingxiaotang_flow)，女声，中文普通话，最适合作为默认主音色。
@@ -27,7 +28,7 @@ import hmac
 import json
 import os
 import sys
-from datetime import datetime
+from email.utils import formatdate
 from urllib.parse import urlencode, urlparse
 
 try:
@@ -197,7 +198,7 @@ class XfeiHyperTTSClient:
         parsed = urlparse(WS_URL)
         host   = parsed.netloc
         path   = parsed.path
-        date   = datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+        date   = formatdate(usegmt=True)
 
         signature_origin = f"host: {host}\ndate: {date}\nGET {path} HTTP/1.1"
 

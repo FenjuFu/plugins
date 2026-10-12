@@ -1,7 +1,9 @@
+import base64
 import contextlib
 import importlib.util
 import io
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -45,6 +47,38 @@ class RuntimeFixesTest(unittest.TestCase):
 
         self.assertEqual(auth_url.netloc, "cbm01.cn-huabei-1.xf-yun.com")
         self.assertEqual(query["host"], ["cbm01.cn-huabei-1.xf-yun.com"])
+
+    def test_image_ocr_auth_date_ignores_locale(self):
+        client = IMAGE_OCR.IflyImageOCRClient("app", "key", "secret")
+        with mock.patch("time.time", return_value=1445412480), mock.patch(
+            "time.strftime", return_value="mer., 21 oct. 2015 07:28:00 GMT"
+        ):
+            query = parse_qs(urlparse(client._generate_auth_url()).query)
+
+        self.assertEqual(query["date"], ["Wed, 21 Oct 2015 07:28:00 GMT"])
+        authorization = base64.b64decode(query["authorization"][0]).decode()
+        self.assertIn('signature="Ozxqh3ptyKWMCgTGsE5ha/IcmdxW50KO0ARlJI6Xlv4="', authorization)
+
+    def test_image_ocr_normalizes_image_suffix(self):
+        client = IMAGE_OCR.IflyImageOCRClient("app", "key", "secret")
+        response = mock.Mock()
+        response.json.return_value = {"header": {"code": 0}}
+        cases = {
+            ".jpg": "jpg", ".JPG": "jpg", ".jpeg": "jpeg",
+            ".JPEG": "jpeg", ".JpEg": "jpeg", ".PNG": "png", ".BMP": "bmp",
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            for suffix, encoding in cases.items():
+                with self.subTest(suffix=suffix):
+                    image_path = Path(temp_dir) / ("image" + suffix)
+                    image_path.write_bytes(b"image-data")
+                    with mock.patch.object(
+                        IMAGE_OCR.requests, "post", return_value=response
+                    ) as post:
+                        client.ocr(str(image_path))
+                    payload = post.call_args.kwargs["json"]["payload"]["image"]
+                    self.assertEqual(payload["encoding"], encoding)
+                    self.assertEqual(base64.b64decode(payload["image"]), b"image-data")
 
     def test_proofread_uses_signed_endpoint_as_host_header(self):
         captured = {}
