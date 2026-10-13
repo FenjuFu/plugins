@@ -2,7 +2,7 @@
   "name": "iflytek-skills",
   "displayName": "iFLYTEK Skills",
   "version": "1.0.0",
-  "description": "Speech, OCR, translation, proofreading, and multimodal AI workflows powered by iFLYTEK APIs.",
+  "description": "Speech, OCR, translation, proofreading, and multimodal workflows powered by iFLYTEK APIs.",
   "author": {
     "name": "iFLYTEK"
   },
