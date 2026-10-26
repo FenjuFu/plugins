@@ -2,6 +2,17 @@
 
 All notable changes to this plugin will be documented here.
 
+## 1.0.2
+
+- The setup skill covers the company tailnet end to end: the admin's **Company tailnet** steps, locking member devices down with `custom:grokbot` postures, and granting MCP hosts to the groups that already reach them.
+- The setup skill covers the beta's per-tailnet enablement by Tailscale, the admin card on cursor.com Integrations, device approval, and the wrong-tailnet sign-out for members in more than one tailnet.
+- The setup skill covers internal DNS names, subnet routes, app connectors, any port, `http://` on tailnet destinations, and `tls.caBundle` for servers with a private CA, plus matching troubleshooting.
+
+## 1.0.1
+
+- Description and setup skill cover the team's company tailnet as well as the personal tailnet.
+- The setup skill points reachability checks to Check host and explains the `tag:grokbot` refusal on company tailnets.
+
 ## 1.0.0 — initial release
 
 - Added the `tailscale` plugin, the opt-in for Grok Bot's built-in Tailscale connection. Installing it and signing in to Tailscale joins Grok Bot to your tailnet as one device tagged `tag:grokbot`.
