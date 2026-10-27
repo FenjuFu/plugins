@@ -649,6 +649,11 @@
       "description": "Read team chats and posts, send messages, and manage teams, tasks, and notes."
     },
     {
+      "name": "servicenow",
+      "source": "third_party/servicenow",
+      "description": "Call the tools your admin publishes on a ServiceNow instance."
+    },
+    {
       "name": "iflytek-skills",
       "source": "third_party/iflytek-skills",
       "description": "Speech, OCR, translation, proofreading, and multimodal workflows powered by iFLYTEK APIs."
