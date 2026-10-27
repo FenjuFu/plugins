@@ -639,6 +639,16 @@
       "description": "Query and remediate compliance tests, controls, frameworks, risks, and vulnerabilities in Vanta."
     },
     {
+      "name": "ringcentral-phone",
+      "source": "third_party/ringcentral-phone",
+      "description": "Read call activity, AI call notes, SMS, voicemail, and fax, and send SMS."
+    },
+    {
+      "name": "ringcentral-chat",
+      "source": "third_party/ringcentral-chat",
+      "description": "Read team chats and posts, send messages, and manage teams, tasks, and notes."
+    },
+    {
       "name": "iflytek-skills",
       "source": "third_party/iflytek-skills",
       "description": "Speech, OCR, translation, proofreading, and multimodal workflows powered by iFLYTEK APIs."
